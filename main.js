@@ -5,7 +5,7 @@ import path from 'path';
 
 const server = express()
 // Directly set the stream key
-const streamkey = 'a9y7-7j31-9977-q3qr-ca7j';
+const streamkey = 'wk7s-yxz0-ama6-amsm-8ygh';
 
 // Generate array of video files from 1 to 121
 const videoFiles = Array.from({ length: 121 }, (_, i) => `${i + 1}.mp4`);
