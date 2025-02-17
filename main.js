@@ -5,7 +5,7 @@ import fs from 'fs';
 import path from 'path';
 
 const server = express()
-const streamkey = process.env.streamkey
+const streamkey = 'a9y7-7j31-9977-q3qr-ca7j'
 
 // Generate array of video files from 1 to 121
 const videoFiles = Array.from({ length: 121 }, (_, i) => `${i + 1}.mp4`);
