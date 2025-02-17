@@ -1,11 +1,11 @@
 import express from 'express'
 import { spawn } from 'child_process'
-import 'dotenv/config';
 import fs from 'fs';
 import path from 'path';
 
 const server = express()
-const streamkey = process.env.streamkey
+// Directly set the stream key
+const streamkey = 'a9y7-7j31-9977-q3qr-ca7j';
 
 // Generate array of video files from 1 to 121
 const videoFiles = Array.from({ length: 121 }, (_, i) => `${i + 1}.mp4`);
@@ -14,6 +14,19 @@ let currentVideoIndex = 0;
 // Function to check if video file exists
 function videoExists(filename) {
     return fs.existsSync(path.join(process.cwd(), filename));
+}
+
+// Function to check if ffmpeg is installed
+async function checkFFmpeg() {
+    try {
+        const child = spawn('ffmpeg', ['-version']);
+        return new Promise((resolve) => {
+            child.on('error', () => resolve(false));
+            child.on('close', (code) => resolve(code === 0));
+        });
+    } catch (error) {
+        return false;
+    }
 }
 
 // Function to get next available video
@@ -55,8 +68,15 @@ function createFFmpegCommand(videoFile) {
 }
 
 // Function to start streaming
-function startStreaming() {
+async function startStreaming() {
     try {
+        // Check if FFmpeg is available
+        const ffmpegAvailable = await checkFFmpeg();
+        if (!ffmpegAvailable) {
+            console.error('FFmpeg is not installed. Please install FFmpeg first.');
+            process.exit(1);
+        }
+
         const videoFile = getNextVideo();
         const ffmpegCommand = createFFmpegCommand(videoFile);
         
@@ -90,20 +110,19 @@ function startStreaming() {
     }
 }
 
-// Start the streaming process
-if (!streamkey) {
-    console.error('No stream key provided. Please set it in your environment variables.');
-    process.exit(1);
-}
-
 // Initialize streaming
 startStreaming();
 
 // Setup express server
-server.use('/', (req, res) => {
+server.get('/', (req, res) => {
     res.send('Your Live Streaming Is Running - Multiple Videos in Loop')
 })
 
-server.listen(3000, () => {
-    console.log('Live stream server is ready on port 3000')
+server.get('/health', (req, res) => {
+    res.status(200).json({ status: 'healthy' });
+})
+
+const PORT = process.env.PORT || 3000;
+server.listen(PORT, () => {
+    console.log(`Live stream server is ready on port ${PORT}`)
 })
